@@ -1,4 +1,4 @@
-import {FC, useState} from 'react'
+import {FC, useState, FormEvent} from 'react'
 import '../App.css'
 interface IRgb  {
   rgb: {r: number,
@@ -15,7 +15,7 @@ const ColorConverter: FC = () => {
     const [hexColor, setHexColor] = useState <string>("#");
     const [rgbColor, setRgbColor] = useState<IRgb>({rgb:{r:0, g:0, b:0}, result: "",currentColor: "34,54,61"});
     
-    const inputHandler = (e:any) => {
+    const inputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
       const inputVal = e.target.value.toString()
         setHexColor(inputVal);
         if (inputVal.length === 7) {
@@ -27,8 +27,8 @@ const ColorConverter: FC = () => {
 
 
     function checkResult(hex:string) {
-      const res: IRgb["rgb"] = hexToRgb(hex)
-      if (hex.charAt(0) !== "#" || (res.r === 0 && res.g === 0 && res.b === 0)) {
+      const res: IRgb["rgb"] | null = hexToRgb(hex);
+      if (!res || hex.charAt(0) !== "#" || (res.r === 0 && res.g === 0 && res.b === 0)) {
         setHexColor("#Привет");
         setRgbColor(prev => ({...prev, result:"Ошибка!"}));
       } else {
@@ -39,13 +39,20 @@ const ColorConverter: FC = () => {
     }
 
 
-    function hexToRgb(hex:string): IRgb["rgb"] {
-        const bigint = parseInt(hex.slice(1), 16);
-        return {
-          r: (bigint >> 16) & 255,
-          g: (bigint >> 8) & 255,
-          b: bigint & 255
+    function hexToRgb(hex:string): IRgb["rgb"] | null {
+      const hexColor:string = hex.slice(1);
+      const cleanHex:RegExp = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i
+        if (cleanHex.test(hexColor)) {
+          const bigint = parseInt(hexColor, 16);
+          return {
+            r: (bigint >> 16) & 255,
+            g: (bigint >> 8) & 255,
+            b: bigint & 255
+          }
+        } else {
+          return null;
         }
+        
     }
 
   
